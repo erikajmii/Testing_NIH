@@ -18,10 +18,10 @@ fs.readFile(inputFilename, 'utf8', async (err, data) => {
     const results = [];
     for (const line of lines) {
         // Split the line into individual parameters
-        const [tdb, rh, met, met2, clo, burn_surface, length_time_simulation] = line.split('\t');
+        const [tdb, rh, met, clo, burn_surface, length_time_simulation, h, w, v] = line.split('\t');
 
         // Call the function with the provided values
-        const t_core = await two_nodes(tdb, rh, met, met2, clo, burn_surface, length_time_simulation);
+        const t_core = await two_nodes(tdb, rh, met, clo, burn_surface, length_time_simulation, h, w, v);
 
         // Add the result to the results array
         results.push(t_core);

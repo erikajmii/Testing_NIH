@@ -14,6 +14,7 @@ export function two_nodes_optimized(
     body_surface_area,
     p_atmospheric,
     body_position,
+    weight,
     calculate_ce = false,
     max_skin_blood_flow = 90,
     max_sweating = 500,
@@ -22,7 +23,7 @@ export function two_nodes_optimized(
     // Initial variables as defined in the ASHRAE 55-2020
     const air_speed = Math.max(v, 0.1);
     const k_clo = 0.25;
-    const body_weight = 70; // body weight in kg
+    const body_weight = weight; // body weight in kg
     const met_factor = 58.2; // met conversion factor
     const sbc = 0.000000056697; // Stefan-Boltzmann constant (W/m2K4)
     const c_sw = 170; // driving coefficient for regulatory sweating
@@ -288,14 +289,18 @@ export function two_nodes_optimized(
 }
 
 //Function that casts parameters and calls two_nodes_optimized 
-export async function two_nodes(tdb, rh, met, met2, clo, burn_surface, length_time_simulation, wme=0,body_surface_area=1.7,p_atmospheric=101325,body_position="standing",max_skin_blood_flow=90){
+export async function two_nodes(tdb, rh, met, clo, burn_surface, length_time_simulation, h, w, v, wme=0, p_atmospheric=101325,body_position="standing",max_skin_blood_flow=90){
     //cast variables
     tdb = parseFloat(tdb);
     let tr = tdb;
-    //get windspeed variable but for now keep it
-    let v = 0;
+
+    let bsa = 0.20247 * Math.pow(h, 0.725) * Math.pow(w, 0.425);
+    console.log("bsa(infunc): " + bsa)
+
+    let weight = w;
+
     rh = parseFloat(rh);
-    met = parseFloat(met2);
+    met = parseFloat(met);
     clo = parseFloat(clo);
     burn_surface = (parseFloat(burn_surface));
     burn_surface = (100 - burn_surface) * 0.01; // getting the factor we need to multiply w_max by
@@ -303,7 +308,7 @@ export async function two_nodes(tdb, rh, met, met2, clo, burn_surface, length_ti
 
         const vapor_pressure = (rh * Math.exp(18.6686 - (4030.183 / (tdb + 235.0)))) / 100;
 
-        let t_core = two_nodes_optimized(tdb,tr,v,met,clo,burn_surface,length_time_simulation,vapor_pressure,wme,body_surface_area,p_atmospheric,body_position);
+        let t_core = two_nodes_optimized(tdb,tr,v,met,clo,burn_surface,length_time_simulation,vapor_pressure,wme,bsa,p_atmospheric,body_position,weight);
             
         return t_core;
 }
